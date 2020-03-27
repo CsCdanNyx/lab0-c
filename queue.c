@@ -14,6 +14,7 @@ queue_t *q_new()
     queue_t *q = malloc(sizeof(queue_t));
     if (!q)
         return NULL;
+
     q->head = NULL;
     q->tail = NULL;
     q->size = 0;
@@ -23,15 +24,16 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    if (q && q->head) {
+    if (!q)
+        return;
+
+    while (q->head) {
         list_ele_t *currentPtr = q->head;
-        while (q->head) {
-            currentPtr = q->head;
-            q->head = q->head->next;
-            free(currentPtr->value);
-            free(currentPtr);
-        }
+        q->head = q->head->next;
+        free(currentPtr->value);
+        free(currentPtr);
     }
+
     /* Free queue structure */
     free(q);
 }
@@ -61,7 +63,8 @@ bool q_insert_head(queue_t *q, char *s)
         return false;
     }
 
-    strcpy(newh->value, s);
+    strncpy(newh->value, s, strlen(s));
+    newh->value[strlen(s)] = '\0';
 
     newh->next = q->head;
     q->head = newh;
@@ -94,7 +97,9 @@ bool q_insert_tail(queue_t *q, char *s)
     }
     newh->next = NULL;
 
-    strcpy(newh->value, s);
+    strncpy(newh->value, s, strlen(s));
+    newh->value[strlen(s)] = '\0';
+
     if (q->size) {
         q->tail->next = newh;
     } else {
@@ -124,7 +129,8 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
             strncpy(sp, q->head->value, bufsize - 1);
             sp[bufsize - 1] = '\0';
         } else {
-            strcpy(sp, q->head->value);
+            strncpy(sp, q->head->value, strlen(q->head->value));
+            sp[strlen(q->head->value)] = '\0';
         }
     }
 
